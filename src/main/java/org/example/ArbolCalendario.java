@@ -2,14 +2,11 @@ package org.example;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-
 /**
- * La clase ArbolCalendario implementa un árbol enario para gestionar el calendario
- * de disponibilidad de las canchas de tenis. Permite reservar y liberar horarios,
- * así como consultar la disponibilidad en fechas específicas.
+ * Clase ArbolCalendario que implementa un árbol n-ario para gestionar reservas
+ * de canchas de tenis.
  */
 public class ArbolCalendario {
     private NodoCalendario raiz;
@@ -17,45 +14,81 @@ public class ArbolCalendario {
             "09:00", "10:00", "11:00", "12:00", "13:00", "14:00",
             "15:00", "16:00", "17:00", "18:00", "19:00", "20:00"
     };
+    private static final int DIAS_CERCANOS = 7; // Días visibles antes y después de la fecha actual
 
     /**
-     * Constructor para crear una nueva instancia de ArbolCalendario.
-     * Inicializa el árbol con el año actual como raíz y genera la estructura inicial.
+     * Constructor que inicializa el árbol con la fecha actual como raíz
      */
     public ArbolCalendario() {
-        raiz = new NodoCalendario(String.valueOf(LocalDate.now().getYear()));
-        inicializarArbol();
+        actualizarRaiz();
     }
 
     /**
-     * Inicializa la estructura del árbol creando nodos para los próximos 12 meses,
-     * sus días correspondientes y las horas disponibles para cada día.
+     * Actualiza la raíz del árbol para reflejar la fecha actual.
      */
-    private void inicializarArbol() {
+    public void actualizarRaiz() {
         LocalDate fechaActual = LocalDate.now();
-        for (int mes = 1; mes <= 12; mes++) {
-            NodoCalendario nodoMes = new NodoCalendario(String.format("%02d", mes));
-            raiz.agregarHijo(nodoMes);
+        raiz = new NodoCalendario(fechaActual.toString());
+        inicializarArbol(fechaActual);
+    }
 
-            int diasEnMes = fechaActual.plusMonths(mes - 1).lengthOfMonth();
-            for (int dia = 1; dia <= diasEnMes; dia++) {
-                NodoCalendario nodoDia = new NodoCalendario(String.format("%02d", dia));
-                nodoMes.agregarHijo(nodoDia);
+    /**
+     * Inicializa la estructura del árbol centrada en la fecha actual.
+     */
+    private void inicializarArbol(LocalDate fechaCentral) {
+        LocalDate fechaInicio = fechaCentral.minusDays(DIAS_CERCANOS);
+        LocalDate fechaFin = fechaCentral.plusDays(DIAS_CERCANOS);
 
-                // Agregar horas disponibles
-                for (String hora : HORAS_DISPONIBLES) {
-                    nodoDia.agregarHijo(new NodoCalendario(hora));
-                }
+        for (LocalDate fecha = fechaInicio; !fecha.isAfter(fechaFin); fecha = fecha.plusDays(1)) {
+            String mes = String.format("%02d", fecha.getMonthValue());
+            String dia = String.format("%02d", fecha.getDayOfMonth());
+
+            NodoCalendario nodoMes = buscarHijo(raiz, mes);
+            if (nodoMes == null) {
+                nodoMes = new NodoCalendario(mes);
+                raiz.agregarHijo(nodoMes);
+            }
+
+            NodoCalendario nodoDia = new NodoCalendario(dia);
+            nodoMes.agregarHijo(nodoDia);
+
+            for (String hora : HORAS_DISPONIBLES) {
+                nodoDia.agregarHijo(new NodoCalendario(hora));
             }
         }
     }
 
     /**
+     * Obtiene los horarios disponibles para una fecha específica.
+     */
+    public List<String> obtenerHorariosDisponibles(LocalDate fecha) {
+        LocalDate fechaRaiz = LocalDate.parse(raiz.getValor());
+        if (fecha.isBefore(fechaRaiz.minusDays(DIAS_CERCANOS)) ||
+                fecha.isAfter(fechaRaiz.plusDays(DIAS_CERCANOS))) {
+            actualizarRaiz();
+        }
+
+        String mes = String.format("%02d", fecha.getMonthValue());
+        String dia = String.format("%02d", fecha.getDayOfMonth());
+
+        List<String> horariosDisponibles = new ArrayList<>();
+        NodoCalendario nodoMes = buscarHijo(raiz, mes);
+        if (nodoMes != null) {
+            NodoCalendario nodoDia = buscarHijo(nodoMes, dia);
+            if (nodoDia != null) {
+                for (NodoCalendario nodoHora : nodoDia.getHijos()) {
+                    if (nodoHora.isDisponible()) {
+                        horariosDisponibles.add(nodoHora.getValor());
+                    }
+                }
+            }
+        }
+
+        return horariosDisponibles;
+    }
+
+    /**
      * Reserva un horario específico para una cancha.
-     *
-     * @param idCancha El identificador de la cancha a reservar
-     * @param fecha La fecha y hora de la reserva
-     * @return true si la reserva fue exitosa, false si no se pudo realizar
      */
     public boolean reservarHorario(String idCancha, LocalDateTime fecha) {
         String mes = String.format("%02d", fecha.getMonthValue());
@@ -78,11 +111,8 @@ public class ArbolCalendario {
 
     /**
      * Libera un horario previamente reservado.
-     *
-     * @param fecha La fecha y hora a liberar
-     * @return true si se liberó exitosamente, false si no se pudo liberar
      */
-    public boolean liberarHorario(LocalDateTime fecha) {
+    public boolean liberarHorario(String idLiberar, LocalDateTime fecha) {
         String mes = String.format("%02d", fecha.getMonthValue());
         String dia = String.format("%02d", fecha.getDayOfMonth());
         String hora = String.format("%02d:00", fecha.getHour());
@@ -103,10 +133,6 @@ public class ArbolCalendario {
 
     /**
      * Busca un nodo hijo específico en un nodo padre dado.
-     *
-     * @param padre El nodo padre donde buscar
-     * @param valor El valor del hijo a buscar
-     * @return El nodo hijo encontrado, o null si no existe
      */
     private NodoCalendario buscarHijo(NodoCalendario padre, String valor) {
         for (NodoCalendario hijo : padre.getHijos()) {
@@ -116,30 +142,5 @@ public class ArbolCalendario {
         }
         return null;
     }
-
-    /**
-     * Obtiene una lista de todos los horarios disponibles para una fecha específica.
-     *
-     * @param fecha La fecha para la cual se quieren obtener los horarios disponibles
-     * @return Lista de horarios disponibles en formato String
-     */
-    public List<String> obtenerHorariosDisponibles(LocalDate fecha) {
-        List<String> horariosDisponibles = new ArrayList<>();
-        String mes = String.format("%02d", fecha.getMonthValue());
-        String dia = String.format("%02d", fecha.getDayOfMonth());
-
-        NodoCalendario nodoMes = buscarHijo(raiz, mes);
-        if (nodoMes == null) return horariosDisponibles;
-
-        NodoCalendario nodoDia = buscarHijo(nodoMes, dia);
-        if (nodoDia == null) return horariosDisponibles;
-
-        for (NodoCalendario nodoHora : nodoDia.getHijos()) {
-            if (nodoHora.isDisponible()) {
-                horariosDisponibles.add(nodoHora.getValor());
-            }
-        }
-
-        return horariosDisponibles;
-    }
 }
+
