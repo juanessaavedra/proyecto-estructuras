@@ -5,6 +5,9 @@ import java.util.List;
 
 /**
  * La clase Cancha representa una cancha de tenis con un identificador, estado y horarios disponibles.
+ * @Autor Ana Lucelly Lizcano, Juan Esteban Saavedra, Esteban Salazar Mejía
+ * Fecha: 1 de diciembre del 2024
+ * Licencia: GNU GPE
  */
 public class Cancha {
     private String identificador;

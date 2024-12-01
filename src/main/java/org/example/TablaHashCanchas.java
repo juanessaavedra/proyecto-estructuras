@@ -3,6 +3,9 @@ package org.example;
 /**
  * La clase TablaHashCanchas representa una tabla hash para gestionar canchas de tenis.
  * Permite insertar, buscar, eliminar y mostrar canchas.
+ * @Autor Ana Lucelly Lizcano, Juan Esteban Saavedra, Esteban Salazar Mejía
+ * Fecha: 1 de diciembre del 2024
+ * Licencia: GNU GPE
  */
 public class TablaHashCanchas {
     private static final int TAMANIO_TABLA = 10;

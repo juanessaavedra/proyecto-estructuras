@@ -14,6 +14,9 @@ import java.util.Scanner;
 /**
  * La clase Main contiene el método principal para ejecutar el sistema de gestión de canchas de tenis.
  * Permite agregar, buscar, eliminar, mostrar y actualizar canchas, así como gestionar horarios.
+ * @Autor Ana Lucelly Lizcano, Juan Esteban Saavedra, Esteban Salazar Mejía
+ * Fecha: 1 de diciembre del 2024
+ * Licencia: GNU GPE
  */
 public class Main {
     public static void main(String[] args) {

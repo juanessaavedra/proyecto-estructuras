@@ -6,6 +6,9 @@ import java.util.List;
 /**
  * La clase NodoCalendario representa un nodo en el árbol de calendario para la gestión de horarios.
  * Cada nodo puede representar un año, mes, día u hora, y mantiene información sobre su disponibilidad.
+ * @Autor Ana Lucelly Lizcano, Juan Esteban Saavedra, Esteban Salazar Mejía
+ * Fecha: 1 de diciembre del 2024
+ * Licencia: GNU GPE
  */
 public class NodoCalendario {
     private String valor; // Puede ser año, mes, día u hora

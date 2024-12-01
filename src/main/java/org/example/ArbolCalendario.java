@@ -7,6 +7,9 @@ import java.util.List;
 /**
  * Clase ArbolCalendario que implementa un árbol n-ario para gestionar reservas
  * de canchas de tenis.
+ * @Autor Ana Lucelly Lizcano, Juan Esteban Saavedra, Esteban Salazar Mejía
+ * Fecha: 1 de diciembre del 2024
+ * Licencia: GNU GPE
  */
 public class ArbolCalendario {
     private NodoCalendario raiz;
